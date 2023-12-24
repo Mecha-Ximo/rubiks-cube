@@ -8,9 +8,10 @@ import {
   ShadowGenerator,
   Vector3,
 } from '@babylonjs/core';
-import { createCube } from './rubikCube';
 
-export const createScene = (canvas: HTMLCanvasElement): Scene => {
+export const createScene = (
+  canvas: HTMLCanvasElement
+): { scene: Scene; shadowGenerator: ShadowGenerator; engine: Engine } => {
   const engine = new Engine(canvas, true);
   const scene = new Scene(engine);
 
@@ -24,13 +25,10 @@ export const createScene = (canvas: HTMLCanvasElement): Scene => {
   );
   camera.attachControl(canvas, true);
 
-  const ambient = new HemisphericLight('ambient', new Vector3(0, 0, 0));
+  new HemisphericLight('ambient', new Vector3(0, 0, 0), scene);
   const light = new DirectionalLight('light', new Vector3(-3, -2, -3), scene);
-  // light.position.y = 10;
-  const shadowGenerator = new ShadowGenerator(1024, light);
 
-  // const sphere = MeshBuilder.CreateSphere('sphere', { diameter: 1 }, scene);
-  const cube = createCube(scene, shadowGenerator);
+  const shadowGenerator = new ShadowGenerator(1024, light);
 
   const ground = MeshBuilder.CreateGround(
     'ground',
@@ -39,9 +37,9 @@ export const createScene = (canvas: HTMLCanvasElement): Scene => {
   );
   ground.receiveShadows = true;
 
-  engine.runRenderLoop(() => {
-    scene.render();
-  });
-
-  return scene;
+  return {
+    scene,
+    shadowGenerator,
+    engine,
+  };
 };

@@ -24,9 +24,9 @@ export function createCube(
   const group = new TransformNode('rubik-cube', scene);
   group.position.x = -1;
   group.position.y = 3;
-  for (let i = 0; i < size; i += 1.1) {
-    for (let j = 0; j < size; j += 1.1) {
-      for (let k = 0; k < size; k += 1.1) {
+  for (let i = 0; i < size; i += 1) {
+    for (let j = 0; j < size; j += 1) {
+      for (let k = 0; k < size; k += 1) {
         const cube = new BaseCube(`box-${i}${j}${k}`, scene, shadowGenerator, {
           x: i,
           y: j,
@@ -53,7 +53,7 @@ export class BaseCube {
     multiMaterial.subMaterials = materials;
 
     // box
-    const box = MeshBuilder.CreateBox(name, { size: 1 }, scene);
+    const box = MeshBuilder.CreateBox(name, { size: 0.99 }, scene);
     box.subMeshes = [];
     const verticesCount = box.getTotalVertices();
     for (let i = 0; i < 6; i++) {
