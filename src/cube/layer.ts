@@ -57,7 +57,7 @@ export class Layer {
     this.scene.beginAnimation(
       this.node,
       0,
-      this.frameRate,
+      this.frameRate / 2,
       false,
       undefined,
       () => {
@@ -100,7 +100,7 @@ export class Layer {
     const keys: IAnimationKey[] = [];
 
     keys.push({ frame: 0, value: currentValue });
-    keys.push({ frame: this.frameRate, value: currentValue + Math.PI / 2 });
+    keys.push({ frame: this.frameRate / 2, value: currentValue + Math.PI / 2 });
 
     rotationAnimation.setKeys(keys);
 

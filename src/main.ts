@@ -37,3 +37,7 @@ canvas.addEventListener('click', function () {
 engine.runRenderLoop(() => {
   scene.render();
 });
+
+window.addEventListener('resize', () => {
+  engine.resize();
+});
