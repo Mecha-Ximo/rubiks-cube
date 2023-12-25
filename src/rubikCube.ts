@@ -53,7 +53,7 @@ export class BaseCube {
     multiMaterial.subMaterials = materials;
 
     // box
-    const box = MeshBuilder.CreateBox(name, { size: 0.99 }, scene);
+    const box = MeshBuilder.CreateBox(name, { size: 0.9 }, scene);
     box.subMeshes = [];
     const verticesCount = box.getTotalVertices();
     for (let i = 0; i < 6; i++) {

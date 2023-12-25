@@ -20,15 +20,27 @@ export class GameManager {
 
   private readonly rubiksCube: TransformNode;
 
-  private readonly auxLayer: Layer;
+  private readonly auxLayerX: Layer;
+  private readonly auxLayerY: Layer;
+  private readonly auxLayerZ: Layer;
 
   constructor(
     private readonly canvas: HTMLCanvasElement,
     private readonly scene: Scene,
-    private readonly shadowGenerator: ShadowGenerator
+    shadowGenerator: ShadowGenerator
   ) {
     this.rubiksCube = createCube(scene, shadowGenerator);
-    this.auxLayer = new Layer({
+    this.auxLayerX = new Layer({
+      name: 'aux-layerX',
+      rubik: this.rubiksCube,
+      scene,
+    });
+    this.auxLayerY = new Layer({
+      name: 'aux-layer',
+      rubik: this.rubiksCube,
+      scene,
+    });
+    this.auxLayerZ = new Layer({
       name: 'aux-layer',
       rubik: this.rubiksCube,
       scene,
@@ -54,7 +66,6 @@ export class GameManager {
   }
 
   private onKeyPress(e: KeyboardEvent) {
-    console.log(e.key);
     if (!this.selectedCubie) {
       return;
     }
@@ -64,44 +75,66 @@ export class GameManager {
         const cubies = this.rubiksCube.getChildren(
           (n): n is Mesh => n instanceof Mesh
         );
-        const layerCubies = cubies.filter(
-          (c) => c.position.y === this.selectedCubie?.position.y
+        const layerCubies = cubies.filter((c) =>
+          this.areNumbersClose(c.position.x, this.selectedCubie!.position.x)
         );
 
-        this.auxLayer.spinCubes(layerCubies, 'y', Math.PI / 2);
+        this.auxLayerX.spinCubes(layerCubies, 'x', Math.PI / 2);
         break;
       }
       case 'ArrowRight': {
         const cubies = this.rubiksCube.getChildren(
           (n): n is Mesh => n instanceof Mesh
         );
-        const layerCubies = cubies.filter(
-          (c) => c.position.y === this.selectedCubie?.position.y
+        const layerCubies = cubies.filter((c) =>
+          this.areNumbersClose(c.position.x, this.selectedCubie!.position.x)
         );
 
-        this.auxLayer.spinCubes(layerCubies, 'y', -Math.PI / 2);
+        this.auxLayerX.spinCubes(layerCubies, 'x', -Math.PI / 2);
         break;
       }
       case 'ArrowUp': {
         const cubies = this.rubiksCube.getChildren(
           (n): n is Mesh => n instanceof Mesh
         );
-        const layerCubies = cubies.filter(
-          (c) => c.position.z === this.selectedCubie?.position.z
+        const layerCubies = cubies.filter((c) =>
+          this.areNumbersClose(c.position.y, this.selectedCubie!.position.y)
         );
 
-        this.auxLayer.spinCubes(layerCubies, 'z', Math.PI / 2);
+        this.auxLayerY.spinCubes(layerCubies, 'y', Math.PI / 2);
         break;
       }
       case 'ArrowDown': {
         const cubies = this.rubiksCube.getChildren(
           (n): n is Mesh => n instanceof Mesh
         );
-        const layerCubies = cubies.filter(
-          (c) => c.position.z === this.selectedCubie?.position.z
+        const layerCubies = cubies.filter((c) =>
+          this.areNumbersClose(c.position.y, this.selectedCubie!.position.y)
         );
 
-        this.auxLayer.spinCubes(layerCubies, 'z', -Math.PI / 2);
+        this.auxLayerY.spinCubes(layerCubies, 'y', -Math.PI / 2);
+        break;
+      }
+      case 'KeyQ': {
+        const cubies = this.rubiksCube.getChildren(
+          (n): n is Mesh => n instanceof Mesh
+        );
+        const layerCubies = cubies.filter((c) =>
+          this.areNumbersClose(c.position.z, this.selectedCubie!.position.z)
+        );
+
+        this.auxLayerZ.spinCubes(layerCubies, 'z', -Math.PI / 2);
+        break;
+      }
+      case 'KeyW': {
+        const cubies = this.rubiksCube.getChildren(
+          (n): n is Mesh => n instanceof Mesh
+        );
+        const layerCubies = cubies.filter((c) =>
+          this.areNumbersClose(c.position.z, this.selectedCubie!.position.z)
+        );
+
+        this.auxLayerZ.spinCubes(layerCubies, 'z', Math.PI / 2);
         break;
       }
     }
@@ -113,5 +146,9 @@ export class GameManager {
     this.onPickMaterial.diffuseColor = new Color3(0.2, 0.2, 0.2);
     this.canvas.addEventListener('click', () => this.onCanvasClick());
     window.addEventListener('keydown', (e) => this.onKeyPress(e));
+  }
+
+  private areNumbersClose(num1: number, num2: number, tolerance = 0.2) {
+    return Math.abs(num1 - num2) <= tolerance;
   }
 }

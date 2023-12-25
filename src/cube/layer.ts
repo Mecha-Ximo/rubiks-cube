@@ -85,7 +85,7 @@ export class Layer {
 
       center[coordinate] = centerPos;
     }
-
+    console.log('center', center);
     this.node.position = center;
   }
 
