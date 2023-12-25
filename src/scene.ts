@@ -23,6 +23,10 @@ export const createScene = (
     new Vector3(0, 0, 0),
     scene
   );
+  camera.keysDown = [];
+  camera.keysLeft = [];
+  camera.keysRight = [];
+  camera.keysUp = [];
   camera.attachControl(canvas, true);
 
   new HemisphericLight('ambient', new Vector3(0, 0, 0), scene);

@@ -35,7 +35,11 @@ export class Layer {
    * Add cubes
    * @param cubes
    */
-  public spinCubes(cubes: Mesh[]): void {
+  public spinCubes(
+    cubes: Mesh[],
+    axis: 'x' | 'y' | 'z',
+    rotationToAdd: number
+  ): void {
     if (this.animationRunning) {
       return;
     }
@@ -48,9 +52,9 @@ export class Layer {
     }
 
     const animation = this.createAnimation(
-      'z',
-      this.node.rotation.z,
-      Math.PI / 2
+      axis,
+      this.node.rotation[axis],
+      rotationToAdd
     );
     this.node.animations.push(animation);
 
@@ -100,7 +104,10 @@ export class Layer {
     const keys: IAnimationKey[] = [];
 
     keys.push({ frame: 0, value: currentValue });
-    keys.push({ frame: this.frameRate / 2, value: currentValue + Math.PI / 2 });
+    keys.push({
+      frame: this.frameRate / 2,
+      value: currentValue + rotationToApply,
+    });
 
     rotationAnimation.setKeys(keys);
 
