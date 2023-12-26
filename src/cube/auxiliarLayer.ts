@@ -18,20 +18,18 @@ export type LayerProps = {
 /**
  * Transform node to spin a set of cubes all together.
  */
-export class AuxiliarLayer {
+export class AuxiliarLayer extends TransformNode {
   private readonly scene: Scene;
 
   private readonly rotationAxis: Axis;
-
-  public readonly node: TransformNode;
 
   private readonly frameRate = 60;
 
   private spinAnimationRunning = false;
 
   constructor(props: LayerProps) {
-    this.node = new TransformNode(props.name, props.scene);
-    this.node.parent = props.rubik;
+    super(props.name, props.scene);
+    this.parent = props.rubik;
     this.scene = props.scene;
     this.rotationAxis = props.rotationAxis;
   }
@@ -45,24 +43,24 @@ export class AuxiliarLayer {
     this.positionLayer(layerCubies);
 
     for (const cube of layerCubies) {
-      cube.setParent(this.node);
+      cube.setParent(this);
     }
 
     const animation = this.createAnimation(
-      this.node.rotation[this.rotationAxis],
+      this.rotation[this.rotationAxis],
       rotationToAdd
     );
-    this.node.animations.push(animation);
+    this.animations.push(animation);
 
     this.scene.beginAnimation(
-      this.node,
+      this,
       0,
       this.frameRate / 2,
       false,
       undefined,
       () => {
         for (const cube of layerCubies) {
-          cube.setParent(this.node.parent);
+          cube.setParent(this.parent);
         }
         this.spinAnimationRunning = false;
       }
@@ -82,7 +80,7 @@ export class AuxiliarLayer {
       center[coordinate] = centerPos;
     }
 
-    this.node.position = center;
+    this.position = center;
   }
 
   private createAnimation(currentValue: number, rotationToApply: number) {
