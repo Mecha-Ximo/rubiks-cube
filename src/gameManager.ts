@@ -39,13 +39,13 @@ export class GameManager {
     });
     this.auxLayerY = new AuxiliarLayer({
       rotationAxis: 'y',
-      name: 'aux-layer',
+      name: 'aux-layerY',
       rubik: this.rubiksCube,
       scene,
     });
     this.auxLayerZ = new AuxiliarLayer({
       rotationAxis: 'z',
-      name: 'aux-layer',
+      name: 'aux-layerZ',
       rubik: this.rubiksCube,
       scene,
     });
@@ -79,34 +79,34 @@ export class GameManager {
     }
 
     switch (e.code) {
-      case 'ArrowLeft': {
-        const layerCubies = this.extractLayerCubies('x', this.selectedCubie);
-        this.auxLayerX.spinCubes(layerCubies, Math.PI / 2);
-        break;
-      }
-      case 'ArrowRight': {
+      case 'ArrowUp': {
         const layerCubies = this.extractLayerCubies('x', this.selectedCubie);
         this.auxLayerX.spinCubes(layerCubies, -Math.PI / 2);
         break;
       }
-      case 'ArrowUp': {
+      case 'ArrowDown': {
+        const layerCubies = this.extractLayerCubies('x', this.selectedCubie);
+        this.auxLayerX.spinCubes(layerCubies, Math.PI / 2);
+        break;
+      }
+      case 'ArrowLeft': {
         const layerCubies = this.extractLayerCubies('y', this.selectedCubie);
         this.auxLayerY.spinCubes(layerCubies, Math.PI / 2);
         break;
       }
-      case 'ArrowDown': {
+      case 'ArrowRight': {
         const layerCubies = this.extractLayerCubies('y', this.selectedCubie);
         this.auxLayerY.spinCubes(layerCubies, -Math.PI / 2);
         break;
       }
       case 'KeyQ': {
         const layerCubies = this.extractLayerCubies('z', this.selectedCubie);
-        this.auxLayerZ.spinCubes(layerCubies, -Math.PI / 2);
+        this.auxLayerZ.spinCubes(layerCubies, Math.PI / 2);
         break;
       }
       case 'KeyW': {
         const layerCubies = this.extractLayerCubies('z', this.selectedCubie);
-        this.auxLayerZ.spinCubes(layerCubies, Math.PI / 2);
+        this.auxLayerZ.spinCubes(layerCubies, -Math.PI / 2);
         break;
       }
     }
