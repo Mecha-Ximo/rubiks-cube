@@ -1,3 +1,5 @@
+import { Mesh, Vector3 } from '@babylonjs/core';
+
 /**
  * Indicates if 2 numbers are close or not.
  * @param num1 - the first number to compare
@@ -12,4 +14,20 @@ export function areNumbersClose(
   tolerance: number
 ): boolean {
   return Math.abs(num1 - num2) <= tolerance;
+}
+
+export function getMeshesCenter(meshes: Mesh[]): Vector3 {
+  const meshesPositions = meshes.map((m) => m.position);
+
+  const center = new Vector3();
+  for (const coordinate of ['x', 'y', 'z'] as const) {
+    const positions = meshesPositions.map((m) => m[coordinate]);
+    const min = Math.min(...positions);
+    const max = Math.max(...positions);
+    const centerPos = (min + max) / 2;
+
+    center[coordinate] = centerPos;
+  }
+
+  return center;
 }

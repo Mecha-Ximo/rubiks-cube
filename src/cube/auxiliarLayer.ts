@@ -2,11 +2,13 @@ import {
   Animation,
   IAnimationKey,
   Mesh,
+  Node,
+  Nullable,
   Scene,
   TransformNode,
-  Vector3,
 } from '@babylonjs/core';
 import { Axis } from '../types';
+import { getMeshesCenter } from '../utils';
 
 export type LayerProps = {
   rotationAxis: Axis;
@@ -40,11 +42,8 @@ export class AuxiliarLayer extends TransformNode {
     }
 
     this.spinAnimationRunning = true;
-    this.positionLayer(layerCubies);
-
-    for (const cube of layerCubies) {
-      cube.setParent(this);
-    }
+    this.position = getMeshesCenter(layerCubies);
+    this.updateCubiesParent(layerCubies, this);
 
     const animation = this.createAnimation(
       this.rotation[this.rotationAxis],
@@ -59,28 +58,16 @@ export class AuxiliarLayer extends TransformNode {
       false,
       undefined,
       () => {
-        for (const cube of layerCubies) {
-          cube.setParent(this.parent);
-        }
+        this.updateCubiesParent(layerCubies, this.parent);
         this.spinAnimationRunning = false;
       }
     );
   }
 
-  private positionLayer(cubies: Mesh[]): void {
-    const meshesPositions = cubies.map((m) => m.position);
-
-    const center = new Vector3();
-    for (const coordinate of ['x', 'y', 'z'] as const) {
-      const positions = meshesPositions.map((m) => m[coordinate]);
-      const min = Math.min(...positions);
-      const max = Math.max(...positions);
-      const centerPos = (min + max) / 2;
-
-      center[coordinate] = centerPos;
+  private updateCubiesParent(cubies: Mesh[], newParent: Nullable<Node>): void {
+    for (const cube of cubies) {
+      cube.setParent(newParent);
     }
-
-    this.position = center;
   }
 
   private createAnimation(currentValue: number, rotationToApply: number) {

@@ -1,4 +1,5 @@
 import {
+  AxesViewer,
   Color3,
   Mesh,
   MeshBuilder,
@@ -9,6 +10,7 @@ import {
   SubMesh,
   TransformNode,
 } from '@babylonjs/core';
+import { getMeshesCenter } from './utils';
 
 type Position = {
   x: number;
@@ -24,6 +26,9 @@ export function createCube(
   const group = new TransformNode('rubik-cube', scene);
   group.position.x = -1;
   group.position.y = 3;
+
+  const cubeMeshes: Mesh[] = [];
+
   for (let i = 0; i < size; i += 1) {
     for (let j = 0; j < size; j += 1) {
       for (let k = 0; k < size; k += 1) {
@@ -32,15 +37,26 @@ export function createCube(
           y: j,
           z: k,
         });
+        cubeMeshes.push(cube.mesh);
         cube.parent = group;
       }
     }
   }
+
+  const center = getMeshesCenter(cubeMeshes);
+  const axes = new AxesViewer(scene, 2.5);
+  axes.xAxis.setParent(group);
+  axes.yAxis.setParent(group);
+  axes.zAxis.setParent(group);
+  axes.xAxis.position = center;
+  axes.yAxis.position = center;
+  axes.zAxis.position = center;
+
   return group;
 }
 
 export class BaseCube {
-  private mesh: Mesh;
+  public mesh: Mesh;
 
   constructor(
     private readonly name: string,
