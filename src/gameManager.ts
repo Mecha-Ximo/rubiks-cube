@@ -1,5 +1,4 @@
 import {
-  AbstractMesh,
   Color3,
   Mesh,
   Scene,
@@ -7,8 +6,10 @@ import {
   StandardMaterial,
   TransformNode,
 } from '@babylonjs/core';
-import { Layer } from './cube/layer';
+import { AuxiliarLayer } from './cube/auxiliarLayer';
 import { createCube } from './rubikCube';
+import { Axis } from './types';
+import { areNumbersClose } from './utils';
 
 export class GameManager {
   private readonly onPickMaterial = new StandardMaterial(
@@ -16,13 +17,13 @@ export class GameManager {
     this.scene
   );
 
-  private selectedCubie: AbstractMesh | null = null;
+  private selectedCubie: Mesh | null = null;
 
   private readonly rubiksCube: TransformNode;
 
-  private readonly auxLayerX: Layer;
-  private readonly auxLayerY: Layer;
-  private readonly auxLayerZ: Layer;
+  private readonly auxLayerX: AuxiliarLayer;
+  private readonly auxLayerY: AuxiliarLayer;
+  private readonly auxLayerZ: AuxiliarLayer;
 
   constructor(
     private readonly canvas: HTMLCanvasElement,
@@ -30,17 +31,20 @@ export class GameManager {
     shadowGenerator: ShadowGenerator
   ) {
     this.rubiksCube = createCube(scene, shadowGenerator);
-    this.auxLayerX = new Layer({
+    this.auxLayerX = new AuxiliarLayer({
+      rotationAxis: 'x',
       name: 'aux-layerX',
       rubik: this.rubiksCube,
       scene,
     });
-    this.auxLayerY = new Layer({
+    this.auxLayerY = new AuxiliarLayer({
+      rotationAxis: 'y',
       name: 'aux-layer',
       rubik: this.rubiksCube,
       scene,
     });
-    this.auxLayerZ = new Layer({
+    this.auxLayerZ = new AuxiliarLayer({
+      rotationAxis: 'z',
       name: 'aux-layer',
       rubik: this.rubiksCube,
       scene,
@@ -58,7 +62,11 @@ export class GameManager {
     }
 
     const pickedMesh = pickResult.pickedMesh;
-    if (!pickedMesh || !pickedMesh.name.startsWith('box-')) {
+    if (
+      !pickedMesh ||
+      !(pickedMesh instanceof Mesh) ||
+      !pickedMesh.name.startsWith('box-')
+    ) {
       return;
     }
 
@@ -72,69 +80,33 @@ export class GameManager {
 
     switch (e.code) {
       case 'ArrowLeft': {
-        const cubies = this.rubiksCube.getChildren(
-          (n): n is Mesh => n instanceof Mesh
-        );
-        const layerCubies = cubies.filter((c) =>
-          this.areNumbersClose(c.position.x, this.selectedCubie!.position.x)
-        );
-
-        this.auxLayerX.spinCubes(layerCubies, 'x', Math.PI / 2);
+        const layerCubies = this.extractLayerCubies('x', this.selectedCubie);
+        this.auxLayerX.spinCubes(layerCubies, Math.PI / 2);
         break;
       }
       case 'ArrowRight': {
-        const cubies = this.rubiksCube.getChildren(
-          (n): n is Mesh => n instanceof Mesh
-        );
-        const layerCubies = cubies.filter((c) =>
-          this.areNumbersClose(c.position.x, this.selectedCubie!.position.x)
-        );
-
-        this.auxLayerX.spinCubes(layerCubies, 'x', -Math.PI / 2);
+        const layerCubies = this.extractLayerCubies('x', this.selectedCubie);
+        this.auxLayerX.spinCubes(layerCubies, -Math.PI / 2);
         break;
       }
       case 'ArrowUp': {
-        const cubies = this.rubiksCube.getChildren(
-          (n): n is Mesh => n instanceof Mesh
-        );
-        const layerCubies = cubies.filter((c) =>
-          this.areNumbersClose(c.position.y, this.selectedCubie!.position.y)
-        );
-
-        this.auxLayerY.spinCubes(layerCubies, 'y', Math.PI / 2);
+        const layerCubies = this.extractLayerCubies('y', this.selectedCubie);
+        this.auxLayerY.spinCubes(layerCubies, Math.PI / 2);
         break;
       }
       case 'ArrowDown': {
-        const cubies = this.rubiksCube.getChildren(
-          (n): n is Mesh => n instanceof Mesh
-        );
-        const layerCubies = cubies.filter((c) =>
-          this.areNumbersClose(c.position.y, this.selectedCubie!.position.y)
-        );
-
-        this.auxLayerY.spinCubes(layerCubies, 'y', -Math.PI / 2);
+        const layerCubies = this.extractLayerCubies('y', this.selectedCubie);
+        this.auxLayerY.spinCubes(layerCubies, -Math.PI / 2);
         break;
       }
       case 'KeyQ': {
-        const cubies = this.rubiksCube.getChildren(
-          (n): n is Mesh => n instanceof Mesh
-        );
-        const layerCubies = cubies.filter((c) =>
-          this.areNumbersClose(c.position.z, this.selectedCubie!.position.z)
-        );
-
-        this.auxLayerZ.spinCubes(layerCubies, 'z', -Math.PI / 2);
+        const layerCubies = this.extractLayerCubies('z', this.selectedCubie);
+        this.auxLayerZ.spinCubes(layerCubies, -Math.PI / 2);
         break;
       }
       case 'KeyW': {
-        const cubies = this.rubiksCube.getChildren(
-          (n): n is Mesh => n instanceof Mesh
-        );
-        const layerCubies = cubies.filter((c) =>
-          this.areNumbersClose(c.position.z, this.selectedCubie!.position.z)
-        );
-
-        this.auxLayerZ.spinCubes(layerCubies, 'z', Math.PI / 2);
+        const layerCubies = this.extractLayerCubies('z', this.selectedCubie);
+        this.auxLayerZ.spinCubes(layerCubies, Math.PI / 2);
         break;
       }
     }
@@ -142,13 +114,20 @@ export class GameManager {
     this.selectedCubie = null;
   }
 
+  private extractLayerCubies(axis: Axis, selectedCubie: Mesh): Mesh[] {
+    const cubies = this.rubiksCube.getChildren(
+      (n): n is Mesh => n instanceof Mesh
+    );
+    const layerCubies = cubies.filter((c) =>
+      areNumbersClose(c.position[axis], selectedCubie.position[axis], 0.2)
+    );
+
+    return layerCubies;
+  }
+
   private setupGame() {
     this.onPickMaterial.diffuseColor = new Color3(0.2, 0.2, 0.2);
     this.canvas.addEventListener('click', () => this.onCanvasClick());
     window.addEventListener('keydown', (e) => this.onKeyPress(e));
-  }
-
-  private areNumbersClose(num1: number, num2: number, tolerance = 0.2) {
-    return Math.abs(num1 - num2) <= tolerance;
   }
 }

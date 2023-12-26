@@ -6,8 +6,10 @@ import {
   TransformNode,
   Vector3,
 } from '@babylonjs/core';
+import { Axis } from '../types';
 
 export type LayerProps = {
+  rotationAxis: Axis;
   rubik: TransformNode;
   name: string;
   scene: Scene;
@@ -16,44 +18,38 @@ export type LayerProps = {
 /**
  * Transform node to spin a set of cubes all together.
  */
-export class Layer {
+export class AuxiliarLayer {
   private readonly scene: Scene;
+
+  private readonly rotationAxis: Axis;
 
   public readonly node: TransformNode;
 
   private readonly frameRate = 60;
 
-  private animationRunning = false;
+  private spinAnimationRunning = false;
 
   constructor(props: LayerProps) {
     this.node = new TransformNode(props.name, props.scene);
     this.node.parent = props.rubik;
     this.scene = props.scene;
+    this.rotationAxis = props.rotationAxis;
   }
 
-  /**
-   * Add cubes
-   * @param cubes
-   */
-  public spinCubes(
-    cubes: Mesh[],
-    axis: 'x' | 'y' | 'z',
-    rotationToAdd: number
-  ): void {
-    if (this.animationRunning) {
+  public spinCubes(layerCubies: Mesh[], rotationToAdd: number): void {
+    if (this.spinAnimationRunning) {
       return;
     }
 
-    this.animationRunning = true;
-    this.positionLayer(cubes);
+    this.spinAnimationRunning = true;
+    this.positionLayer(layerCubies);
 
-    for (const cube of cubes) {
+    for (const cube of layerCubies) {
       cube.setParent(this.node);
     }
 
     const animation = this.createAnimation(
-      axis,
-      this.node.rotation[axis],
+      this.node.rotation[this.rotationAxis],
       rotationToAdd
     );
     this.node.animations.push(animation);
@@ -65,10 +61,10 @@ export class Layer {
       false,
       undefined,
       () => {
-        for (const cube of cubes) {
+        for (const cube of layerCubies) {
           cube.setParent(this.node.parent);
         }
-        this.animationRunning = false;
+        this.spinAnimationRunning = false;
       }
     );
   }
@@ -85,18 +81,14 @@ export class Layer {
 
       center[coordinate] = centerPos;
     }
-    console.log('center', center);
+
     this.node.position = center;
   }
 
-  private createAnimation(
-    axis: 'x' | 'y' | 'z',
-    currentValue: number,
-    rotationToApply: number
-  ) {
+  private createAnimation(currentValue: number, rotationToApply: number) {
     const rotationAnimation = new Animation(
       'rotateAnimation',
-      `rotation.${axis}`,
+      `rotation.${this.rotationAxis}`,
       this.frameRate,
       Animation.ANIMATIONTYPE_FLOAT,
       Animation.ANIMATIONLOOPMODE_CONSTANT
