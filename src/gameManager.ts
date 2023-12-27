@@ -5,9 +5,10 @@ import {
   ShadowGenerator,
   StandardMaterial,
   TransformNode,
+  Vector3,
 } from '@babylonjs/core';
 import { AuxiliarLayer } from './cube/auxiliarLayer';
-import { createCube } from './rubikCube';
+import { RubiksCube } from './cube/rubiksCube';
 import { Axis } from './types';
 import { areNumbersClose } from './utils';
 
@@ -30,7 +31,14 @@ export class GameManager {
     private readonly scene: Scene,
     shadowGenerator: ShadowGenerator
   ) {
-    this.rubiksCube = createCube(scene, shadowGenerator);
+    this.rubiksCube = new RubiksCube({
+      name: 'rubiks-cube',
+      position: new Vector3(-1, 2, 0),
+      scene,
+      shadowGenerator,
+      size: 4,
+    });
+
     this.auxLayerX = new AuxiliarLayer({
       rotationAxis: 'x',
       name: 'aux-layerX',
@@ -49,6 +57,7 @@ export class GameManager {
       rubik: this.rubiksCube,
       scene,
     });
+
     this.setupGame();
   }
 
@@ -65,7 +74,7 @@ export class GameManager {
     if (
       !pickedMesh ||
       !(pickedMesh instanceof Mesh) ||
-      !pickedMesh.name.startsWith('box-')
+      !pickedMesh.name.startsWith('box[')
     ) {
       return;
     }
