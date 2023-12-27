@@ -36,7 +36,11 @@ export class AuxiliarLayer extends TransformNode {
     this.rotationAxis = props.rotationAxis;
   }
 
-  public spinCubes(layerCubies: Mesh[], rotationToAdd: number): void {
+  public spinCubes(
+    layerCubies: Mesh[],
+    rotationToAdd: number,
+    speed = 1
+  ): void {
     if (this.spinAnimationRunning) {
       return;
     }
@@ -47,14 +51,15 @@ export class AuxiliarLayer extends TransformNode {
 
     const animation = this.createAnimation(
       this.rotation[this.rotationAxis],
-      rotationToAdd
+      rotationToAdd,
+      speed
     );
     this.animations.push(animation);
 
     this.scene.beginAnimation(
       this,
       0,
-      this.frameRate / 2,
+      this.frameRate / speed,
       false,
       undefined,
       () => {
@@ -70,7 +75,11 @@ export class AuxiliarLayer extends TransformNode {
     }
   }
 
-  private createAnimation(currentValue: number, rotationToApply: number) {
+  private createAnimation(
+    currentValue: number,
+    rotationToApply: number,
+    speed = 1
+  ) {
     const rotationAnimation = new Animation(
       'rotateAnimation',
       `rotation.${this.rotationAxis}`,
@@ -82,7 +91,7 @@ export class AuxiliarLayer extends TransformNode {
 
     keys.push({ frame: 0, value: currentValue });
     keys.push({
-      frame: this.frameRate / 2,
+      frame: this.frameRate / speed,
       value: currentValue + rotationToApply,
     });
 
