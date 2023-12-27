@@ -4,12 +4,12 @@ import {
   Scene,
   ShadowGenerator,
   StandardMaterial,
-  TransformNode,
   Vector3,
 } from '@babylonjs/core';
+import { BASE_ROTATION } from './constants';
 import { AuxiliarLayer } from './cube/auxiliarLayer';
 import { RubiksCube } from './cube/rubiksCube';
-import { Axis } from './types';
+import { Axis, Difficulty } from './types';
 import { areNumbersClose } from './utils';
 
 export class GameManager {
@@ -20,7 +20,7 @@ export class GameManager {
 
   private selectedCubie: Mesh | null = null;
 
-  private readonly rubiksCube: TransformNode;
+  private readonly rubiksCube: RubiksCube;
 
   private readonly auxLayerX: AuxiliarLayer;
   private readonly auxLayerY: AuxiliarLayer;
@@ -59,6 +59,7 @@ export class GameManager {
     });
 
     this.setupGame();
+    this.startGame(Difficulty.EASY);
   }
 
   private onCanvasClick() {
@@ -82,42 +83,42 @@ export class GameManager {
     this.selectedCubie = pickedMesh;
   }
 
-  private onKeyPress(e: KeyboardEvent) {
+  private async onKeyPress(e: KeyboardEvent) {
     if (!this.selectedCubie) {
       return;
     }
 
-    const speed = 3;
+    const speed = 5;
 
     switch (e.code) {
       case 'ArrowUp': {
         const layerCubies = this.extractLayerCubies('x', this.selectedCubie);
-        this.auxLayerX.spinCubes(layerCubies, -Math.PI / 2, speed);
+        await this.auxLayerX.spinCubes(layerCubies, -BASE_ROTATION, speed);
         break;
       }
       case 'ArrowDown': {
         const layerCubies = this.extractLayerCubies('x', this.selectedCubie);
-        this.auxLayerX.spinCubes(layerCubies, Math.PI / 2, speed);
+        await this.auxLayerX.spinCubes(layerCubies, BASE_ROTATION, speed);
         break;
       }
       case 'ArrowLeft': {
         const layerCubies = this.extractLayerCubies('y', this.selectedCubie);
-        this.auxLayerY.spinCubes(layerCubies, Math.PI / 2, speed);
+        await this.auxLayerY.spinCubes(layerCubies, BASE_ROTATION, speed);
         break;
       }
       case 'ArrowRight': {
         const layerCubies = this.extractLayerCubies('y', this.selectedCubie);
-        this.auxLayerY.spinCubes(layerCubies, -Math.PI / 2, speed);
+        await this.auxLayerY.spinCubes(layerCubies, -BASE_ROTATION, speed);
         break;
       }
       case 'KeyQ': {
         const layerCubies = this.extractLayerCubies('z', this.selectedCubie);
-        this.auxLayerZ.spinCubes(layerCubies, Math.PI / 2, speed);
+        await this.auxLayerZ.spinCubes(layerCubies, BASE_ROTATION, speed);
         break;
       }
       case 'KeyW': {
         const layerCubies = this.extractLayerCubies('z', this.selectedCubie);
-        this.auxLayerZ.spinCubes(layerCubies, -Math.PI / 2, speed);
+        await this.auxLayerZ.spinCubes(layerCubies, -BASE_ROTATION, speed);
         break;
       }
     }
@@ -140,5 +141,62 @@ export class GameManager {
     this.onPickMaterial.diffuseColor = new Color3(0.2, 0.2, 0.2);
     this.canvas.addEventListener('click', () => this.onCanvasClick());
     window.addEventListener('keydown', (e) => this.onKeyPress(e));
+  }
+
+  private async startGame(difficulty: Difficulty): Promise<void> {
+    const speed = 2.5;
+
+    const moves =
+      difficulty === Difficulty.EASY
+        ? 25
+        : difficulty === Difficulty.MEDIUM
+        ? 50
+        : 100;
+
+    const cubies = this.rubiksCube.cubies;
+    const axes: [Axis, Axis, Axis] = ['x', 'y', 'z'];
+    const rotations: number[] = [
+      BASE_ROTATION,
+      BASE_ROTATION * 2,
+      BASE_ROTATION * 3,
+    ];
+
+    for (let i = 0; i < moves; i++) {
+      const cubieIndex = Math.floor(Math.random() * cubies.length);
+      const axisIndex = Math.floor(Math.random() * axes.length);
+      const rotationIndex = Math.floor(Math.random() * rotations.length);
+
+      const layerCubies = this.extractLayerCubies(
+        axes[axisIndex],
+        cubies[cubieIndex]
+      );
+
+      if (axes[axisIndex] === 'x') {
+        await this.auxLayerX.spinCubes(
+          layerCubies,
+          rotations[rotationIndex],
+          speed
+        );
+        continue;
+      }
+
+      if (axes[axisIndex] === 'y') {
+        await this.auxLayerY.spinCubes(
+          layerCubies,
+          rotations[rotationIndex],
+          speed
+        );
+        continue;
+      }
+
+      if (axes[axisIndex] === 'z') {
+        await this.auxLayerZ.spinCubes(
+          layerCubies,
+          rotations[rotationIndex],
+          speed
+        );
+        continue;
+      }
+    }
   }
 }

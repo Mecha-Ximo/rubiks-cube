@@ -40,6 +40,10 @@ export class RubiksCube extends TransformNode {
     return this.cubeCenter;
   }
 
+  public get cubies(): Mesh[] {
+    return this.getChildMeshes();
+  }
+
   private createCubies(
     size: number,
     scene: Scene,

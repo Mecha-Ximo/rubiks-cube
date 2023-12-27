@@ -5,3 +5,9 @@ export type Position = {
   y: number;
   z: number;
 };
+
+export enum Difficulty {
+  EASY = 'easy',
+  MEDIUM = 'medium',
+  HARD = 'hard',
+}

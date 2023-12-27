@@ -1,11 +1,14 @@
 import {
   ArcRotateCamera,
+  Color3,
+  Color4,
   DirectionalLight,
   Engine,
   HemisphericLight,
   MeshBuilder,
   Scene,
   ShadowGenerator,
+  StandardMaterial,
   Vector3,
 } from '@babylonjs/core';
 
@@ -14,6 +17,7 @@ export const createScene = (
 ): { scene: Scene; shadowGenerator: ShadowGenerator; engine: Engine } => {
   const engine = new Engine(canvas, true);
   const scene = new Scene(engine);
+  scene.clearColor = new Color4(0.2, 0.2, 0.2, 0.5);
 
   const camera = new ArcRotateCamera(
     'camera',
@@ -40,6 +44,9 @@ export const createScene = (
     scene
   );
   ground.receiveShadows = true;
+  const groundMaterial = new StandardMaterial('ground-material', scene);
+  groundMaterial.diffuseColor = new Color3(0.9, 0.9, 0.9);
+  ground.material = groundMaterial;
 
   return {
     scene,

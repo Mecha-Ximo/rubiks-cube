@@ -40,11 +40,10 @@ export class AuxiliarLayer extends TransformNode {
     layerCubies: Mesh[],
     rotationToAdd: number,
     speed = 1
-  ): void {
+  ): Promise<void> {
     if (this.spinAnimationRunning) {
-      return;
+      return Promise.resolve();
     }
-
     this.spinAnimationRunning = true;
     this.position = getMeshesCenter(layerCubies);
     this.updateCubiesParent(layerCubies, this);
@@ -56,17 +55,20 @@ export class AuxiliarLayer extends TransformNode {
     );
     this.animations.push(animation);
 
-    this.scene.beginAnimation(
-      this,
-      0,
-      this.frameRate / speed,
-      false,
-      undefined,
-      () => {
-        this.updateCubiesParent(layerCubies, this.parent);
-        this.spinAnimationRunning = false;
-      }
-    );
+    return new Promise((resolve) => {
+      this.scene.beginAnimation(
+        this,
+        0,
+        this.frameRate / speed,
+        false,
+        undefined,
+        () => {
+          this.updateCubiesParent(layerCubies, this.parent);
+          this.spinAnimationRunning = false;
+          resolve();
+        }
+      );
+    });
   }
 
   private updateCubiesParent(cubies: Mesh[], newParent: Nullable<Node>): void {
