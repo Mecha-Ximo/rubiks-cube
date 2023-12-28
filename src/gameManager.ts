@@ -1,34 +1,20 @@
-import {
-  Color3,
-  Mesh,
-  Scene,
-  ShadowGenerator,
-  StandardMaterial,
-  Vector3,
-} from '@babylonjs/core';
+import { Mesh, Scene, ShadowGenerator, Vector3 } from '@babylonjs/core';
 import { BASE_ROTATION } from './constants';
 import { AuxiliarLayer } from './cube/auxiliarLayer';
 import { RubiksCube } from './cube/rubiksCube';
+import { SelectionManager } from './game/selectionManager';
 import { Axis, Difficulty } from './types';
+import { AuxiliarLayers } from './types/layer';
 import { areNumbersClose } from './utils';
 
 export class GameManager {
-  private readonly onPickMaterial = new StandardMaterial(
-    'selected',
-    this.scene
-  );
-
-  private selectedCubie: Mesh | null = null;
-
   private readonly rubiksCube: RubiksCube;
 
-  private readonly auxLayerX: AuxiliarLayer;
-  private readonly auxLayerY: AuxiliarLayer;
-  private readonly auxLayerZ: AuxiliarLayer;
+  private readonly auxiliarLayers: AuxiliarLayers;
 
   constructor(
-    private readonly canvas: HTMLCanvasElement,
-    private readonly scene: Scene,
+    canvas: HTMLCanvasElement,
+    scene: Scene,
     shadowGenerator: ShadowGenerator
   ) {
     this.rubiksCube = new RubiksCube({
@@ -39,91 +25,29 @@ export class GameManager {
       size: 4,
     });
 
-    this.auxLayerX = new AuxiliarLayer({
-      rotationAxis: 'x',
-      name: 'aux-layerX',
-      rubik: this.rubiksCube,
-      scene,
-    });
-    this.auxLayerY = new AuxiliarLayer({
-      rotationAxis: 'y',
-      name: 'aux-layerY',
-      rubik: this.rubiksCube,
-      scene,
-    });
-    this.auxLayerZ = new AuxiliarLayer({
-      rotationAxis: 'z',
-      name: 'aux-layerZ',
-      rubik: this.rubiksCube,
-      scene,
-    });
+    this.auxiliarLayers = {
+      x: new AuxiliarLayer({
+        rotationAxis: 'x',
+        name: 'aux-layerX',
+        rubik: this.rubiksCube,
+        scene,
+      }),
+      y: new AuxiliarLayer({
+        rotationAxis: 'y',
+        name: 'aux-layerY',
+        rubik: this.rubiksCube,
+        scene,
+      }),
+      z: new AuxiliarLayer({
+        rotationAxis: 'z',
+        name: 'aux-layerZ',
+        rubik: this.rubiksCube,
+        scene,
+      }),
+    };
 
-    this.setupGame();
     this.startGame(Difficulty.EASY);
-  }
-
-  private onCanvasClick() {
-    const pickResult = this.scene.pick(
-      this.scene.pointerX,
-      this.scene.pointerY
-    );
-    if (!pickResult) {
-      return;
-    }
-
-    const pickedMesh = pickResult.pickedMesh;
-    if (
-      !pickedMesh ||
-      !(pickedMesh instanceof Mesh) ||
-      !pickedMesh.name.startsWith('box[')
-    ) {
-      return;
-    }
-
-    this.selectedCubie = pickedMesh;
-  }
-
-  private async onKeyPress(e: KeyboardEvent) {
-    if (!this.selectedCubie) {
-      return;
-    }
-
-    const speed = 5;
-
-    switch (e.code) {
-      case 'ArrowUp': {
-        const layerCubies = this.extractLayerCubies('x', this.selectedCubie);
-        await this.auxLayerX.spinCubes(layerCubies, -BASE_ROTATION, speed);
-        break;
-      }
-      case 'ArrowDown': {
-        const layerCubies = this.extractLayerCubies('x', this.selectedCubie);
-        await this.auxLayerX.spinCubes(layerCubies, BASE_ROTATION, speed);
-        break;
-      }
-      case 'ArrowLeft': {
-        const layerCubies = this.extractLayerCubies('y', this.selectedCubie);
-        await this.auxLayerY.spinCubes(layerCubies, BASE_ROTATION, speed);
-        break;
-      }
-      case 'ArrowRight': {
-        const layerCubies = this.extractLayerCubies('y', this.selectedCubie);
-        await this.auxLayerY.spinCubes(layerCubies, -BASE_ROTATION, speed);
-        break;
-      }
-      case 'KeyQ': {
-        const layerCubies = this.extractLayerCubies('z', this.selectedCubie);
-        await this.auxLayerZ.spinCubes(layerCubies, BASE_ROTATION, speed);
-        break;
-      }
-      case 'KeyW': {
-        const layerCubies = this.extractLayerCubies('z', this.selectedCubie);
-        await this.auxLayerZ.spinCubes(layerCubies, -BASE_ROTATION, speed);
-        break;
-      }
-    }
-
-    this.selectedCubie = null;
+    new SelectionManager(this.auxiliarLayers, this.rubiksCube, scene, canvas);
   }
 
   private extractLayerCubies(axis: Axis, selectedCubie: Mesh): Mesh[] {
@@ -135,12 +59,6 @@ export class GameManager {
     );
 
     return layerCubies;
-  }
-
-  private setupGame() {
-    this.onPickMaterial.diffuseColor = new Color3(0.2, 0.2, 0.2);
-    this.canvas.addEventListener('click', () => this.onCanvasClick());
-    window.addEventListener('keydown', (e) => this.onKeyPress(e));
   }
 
   private async startGame(difficulty: Difficulty): Promise<void> {
@@ -171,32 +89,11 @@ export class GameManager {
         cubies[cubieIndex]
       );
 
-      if (axes[axisIndex] === 'x') {
-        await this.auxLayerX.spinCubes(
-          layerCubies,
-          rotations[rotationIndex],
-          speed
-        );
-        continue;
-      }
-
-      if (axes[axisIndex] === 'y') {
-        await this.auxLayerY.spinCubes(
-          layerCubies,
-          rotations[rotationIndex],
-          speed
-        );
-        continue;
-      }
-
-      if (axes[axisIndex] === 'z') {
-        await this.auxLayerZ.spinCubes(
-          layerCubies,
-          rotations[rotationIndex],
-          speed
-        );
-        continue;
-      }
+      await this.auxiliarLayers[axes[axisIndex]].spinCubes(
+        layerCubies,
+        rotations[rotationIndex],
+        speed
+      );
     }
   }
 }
