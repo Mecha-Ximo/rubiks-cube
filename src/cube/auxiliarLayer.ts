@@ -8,11 +8,12 @@ import {
   TransformNode,
 } from '@babylonjs/core';
 import { Axis } from '../types';
-import { getMeshesCenter } from '../utils';
+import { areNumbersClose, getMeshesCenter } from '../utils';
+import { RubiksCube } from './rubiksCube';
 
 export type LayerProps = {
   rotationAxis: Axis;
-  rubik: TransformNode;
+  rubik: RubiksCube;
   name: string;
   scene: Scene;
 };
@@ -25,6 +26,8 @@ export class AuxiliarLayer extends TransformNode {
 
   private readonly rotationAxis: Axis;
 
+  private readonly rubiksCube: RubiksCube;
+
   private readonly frameRate = 60;
 
   private spinAnimationRunning = false;
@@ -32,19 +35,22 @@ export class AuxiliarLayer extends TransformNode {
   constructor(props: LayerProps) {
     super(props.name, props.scene);
     this.parent = props.rubik;
+    this.rubiksCube = props.rubik;
     this.scene = props.scene;
     this.rotationAxis = props.rotationAxis;
   }
 
-  public spinCubes(
-    layerCubies: Mesh[],
+  public spinCube(
+    cubie: Mesh,
     rotationToAdd: number,
     speed = 1
   ): Promise<void> {
     if (this.spinAnimationRunning) {
       return Promise.resolve();
     }
+
     this.spinAnimationRunning = true;
+    const layerCubies = this.extractLayerCubies(cubie);
     this.position = getMeshesCenter(layerCubies);
     this.updateCubiesParent(layerCubies, this);
 
@@ -69,6 +75,21 @@ export class AuxiliarLayer extends TransformNode {
         }
       );
     });
+  }
+
+  private extractLayerCubies(selectedCubie: Mesh): Mesh[] {
+    const cubies = this.rubiksCube.getChildren(
+      (n): n is Mesh => n instanceof Mesh
+    );
+    const layerCubies = cubies.filter((c) =>
+      areNumbersClose(
+        c.position[this.rotationAxis],
+        selectedCubie.position[this.rotationAxis],
+        0.2
+      )
+    );
+
+    return layerCubies;
   }
 
   private updateCubiesParent(cubies: Mesh[], newParent: Nullable<Node>): void {

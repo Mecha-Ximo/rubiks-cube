@@ -1,11 +1,10 @@
-import { Mesh, Scene, ShadowGenerator, Vector3 } from '@babylonjs/core';
+import { Scene, ShadowGenerator, Vector3 } from '@babylonjs/core';
 import { BASE_ROTATION } from './constants';
 import { AuxiliarLayer } from './cube/auxiliarLayer';
 import { RubiksCube } from './cube/rubiksCube';
 import { SelectionManager } from './game/selectionManager';
 import { Axis, Difficulty } from './types';
 import { AuxiliarLayers } from './types/layer';
-import { areNumbersClose } from './utils';
 
 export class GameManager {
   private readonly rubiksCube: RubiksCube;
@@ -47,18 +46,7 @@ export class GameManager {
     };
 
     this.startGame(Difficulty.EASY);
-    new SelectionManager(this.auxiliarLayers, this.rubiksCube, scene, canvas);
-  }
-
-  private extractLayerCubies(axis: Axis, selectedCubie: Mesh): Mesh[] {
-    const cubies = this.rubiksCube.getChildren(
-      (n): n is Mesh => n instanceof Mesh
-    );
-    const layerCubies = cubies.filter((c) =>
-      areNumbersClose(c.position[axis], selectedCubie.position[axis], 0.2)
-    );
-
-    return layerCubies;
+    new SelectionManager(this.auxiliarLayers, scene, canvas);
   }
 
   private async startGame(difficulty: Difficulty): Promise<void> {
@@ -84,13 +72,8 @@ export class GameManager {
       const axisIndex = Math.floor(Math.random() * axes.length);
       const rotationIndex = Math.floor(Math.random() * rotations.length);
 
-      const layerCubies = this.extractLayerCubies(
-        axes[axisIndex],
-        cubies[cubieIndex]
-      );
-
-      await this.auxiliarLayers[axes[axisIndex]].spinCubes(
-        layerCubies,
+      await this.auxiliarLayers[axes[axisIndex]].spinCube(
+        cubies[cubieIndex],
         rotations[rotationIndex],
         speed
       );

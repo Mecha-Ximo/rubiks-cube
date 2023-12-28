@@ -1,9 +1,7 @@
 import { Color3, Mesh, Scene, StandardMaterial } from '@babylonjs/core';
 import { BASE_ROTATION } from '../constants';
-import { RubiksCube } from '../cube/rubiksCube';
 import { Axis } from '../types';
 import { AuxiliarLayers } from '../types/layer';
-import { areNumbersClose } from '../utils';
 
 export class SelectionManager {
   private selectedCubie: Mesh | null = null;
@@ -15,7 +13,6 @@ export class SelectionManager {
 
   constructor(
     private readonly auxiliarLayers: AuxiliarLayers,
-    private readonly rubiksCube: RubiksCube,
     private readonly scene: Scene,
     private readonly canvas: HTMLCanvasElement
   ) {
@@ -43,80 +40,53 @@ export class SelectionManager {
     this.selectedCubie = pickedMesh;
   }
 
-  private extractLayerCubies(axis: Axis, selectedCubie: Mesh): Mesh[] {
-    const cubies = this.rubiksCube.getChildren(
-      (n): n is Mesh => n instanceof Mesh
-    );
-    const layerCubies = cubies.filter((c) =>
-      areNumbersClose(c.position[axis], selectedCubie.position[axis], 0.2)
-    );
-
-    return layerCubies;
-  }
-
   private async onKeyPress(e: KeyboardEvent) {
     if (!this.selectedCubie) {
       return;
     }
 
     const speed = 5;
+    let rotation = 0;
+    let axis: Axis = 'x';
 
     switch (e.code) {
       case 'ArrowUp': {
-        const layerCubies = this.extractLayerCubies('x', this.selectedCubie);
-        await this.auxiliarLayers['x'].spinCubes(
-          layerCubies,
-          -BASE_ROTATION,
-          speed
-        );
+        rotation = -BASE_ROTATION;
+        axis = 'x';
         break;
       }
       case 'ArrowDown': {
-        const layerCubies = this.extractLayerCubies('x', this.selectedCubie);
-        await this.auxiliarLayers['x'].spinCubes(
-          layerCubies,
-          BASE_ROTATION,
-          speed
-        );
+        rotation = BASE_ROTATION;
+        axis = 'x';
         break;
       }
       case 'ArrowLeft': {
-        const layerCubies = this.extractLayerCubies('y', this.selectedCubie);
-        await this.auxiliarLayers['y'].spinCubes(
-          layerCubies,
-          BASE_ROTATION,
-          speed
-        );
+        rotation = BASE_ROTATION;
+        axis = 'y';
         break;
       }
       case 'ArrowRight': {
-        const layerCubies = this.extractLayerCubies('y', this.selectedCubie);
-        await this.auxiliarLayers['y'].spinCubes(
-          layerCubies,
-          -BASE_ROTATION,
-          speed
-        );
+        rotation = -BASE_ROTATION;
+        axis = 'y';
         break;
       }
       case 'KeyQ': {
-        const layerCubies = this.extractLayerCubies('z', this.selectedCubie);
-        await this.auxiliarLayers['z'].spinCubes(
-          layerCubies,
-          BASE_ROTATION,
-          speed
-        );
+        rotation = BASE_ROTATION;
+        axis = 'z';
         break;
       }
       case 'KeyW': {
-        const layerCubies = this.extractLayerCubies('z', this.selectedCubie);
-        await this.auxiliarLayers['z'].spinCubes(
-          layerCubies,
-          -BASE_ROTATION,
-          speed
-        );
+        rotation = -BASE_ROTATION;
+        axis = 'z';
         break;
       }
     }
+
+    await this.auxiliarLayers[axis].spinCube(
+      this.selectedCubie,
+      rotation,
+      speed
+    );
 
     this.selectedCubie = null;
   }
