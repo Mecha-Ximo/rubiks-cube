@@ -1,5 +1,4 @@
 import {
-  AxesViewer,
   Mesh,
   Scene,
   ShadowGenerator,
@@ -32,8 +31,6 @@ export class RubiksCube extends TransformNode {
     );
 
     this.cubeCenter = getMeshesCenter(cubiesMeshes);
-
-    this.createCoordinateSystem(props.scene);
   }
 
   public get center(): Vector3 {
@@ -72,18 +69,5 @@ export class RubiksCube extends TransformNode {
     }
 
     return meshes;
-  }
-
-  // TODO: move to selector class (only appears when cubie selected)
-  private createCoordinateSystem(scene: Scene): AxesViewer {
-    const axes = new AxesViewer(scene, 2.5);
-    axes.xAxis.setParent(this);
-    axes.yAxis.setParent(this);
-    axes.zAxis.setParent(this);
-    axes.xAxis.position = this.center;
-    axes.yAxis.position = this.center;
-    axes.zAxis.position = this.center;
-
-    return axes;
   }
 }

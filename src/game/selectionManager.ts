@@ -1,25 +1,53 @@
-import { Color3, Mesh, Scene, StandardMaterial } from '@babylonjs/core';
+import {
+  Color3,
+  Material,
+  Mesh,
+  Nullable,
+  Scene,
+  StandardMaterial,
+} from '@babylonjs/core';
 import { BASE_ROTATION } from '../constants';
+import { RubiksCube } from '../cube/rubiksCube';
 import { Axis } from '../types';
 import { AuxiliarLayers } from '../types/layer';
+import { CoordinateSystemHelper } from './coordinateSystemHelper';
 
 export class SelectionManager {
   private selectedCubie: Mesh | null = null;
+
+  private baseCubieMaterial: Nullable<Material> = null;
 
   private readonly onPickMaterial = new StandardMaterial(
     'selected',
     this.scene
   );
 
+  private readonly coordinateSystemHelper: CoordinateSystemHelper;
+
   constructor(
     private readonly auxiliarLayers: AuxiliarLayers,
     private readonly scene: Scene,
-    private readonly canvas: HTMLCanvasElement
+    private readonly canvas: HTMLCanvasElement,
+    rubiksCube: RubiksCube
   ) {
-    this.setupGame();
+    this.coordinateSystemHelper = new CoordinateSystemHelper(
+      rubiksCube,
+      scene,
+      3
+    );
+    this.coordinateSystemHelper.setVisible(false);
+    this.setupSelection();
+  }
+
+  public get isSelectionMode(): boolean {
+    return !!this.selectCubie;
   }
 
   private onCanvasClick() {
+    if (this.selectedCubie) {
+      this.unselectCubie(this.selectedCubie);
+    }
+
     const pickResult = this.scene.pick(
       this.scene.pointerX,
       this.scene.pointerY
@@ -37,7 +65,20 @@ export class SelectionManager {
       return;
     }
 
-    this.selectedCubie = pickedMesh;
+    this.selectCubie(pickedMesh);
+  }
+
+  private selectCubie(cubie: Mesh): void {
+    this.selectedCubie = cubie;
+    this.baseCubieMaterial = cubie.material;
+    cubie.material = this.onPickMaterial;
+    this.coordinateSystemHelper.setVisible(true);
+  }
+
+  private unselectCubie(cubie: Mesh): void {
+    cubie.material = this.baseCubieMaterial;
+    this.selectedCubie = null;
+    this.coordinateSystemHelper.setVisible(false);
   }
 
   private async onKeyPress(e: KeyboardEvent) {
@@ -88,11 +129,11 @@ export class SelectionManager {
       speed
     );
 
-    this.selectedCubie = null;
+    this.unselectCubie(this.selectedCubie);
   }
 
-  private setupGame() {
-    this.onPickMaterial.diffuseColor = new Color3(0.2, 0.2, 0.2);
+  private setupSelection() {
+    this.onPickMaterial.diffuseColor = new Color3(0.3, 0.3, 0.3);
     this.canvas.addEventListener('click', () => this.onCanvasClick());
     window.addEventListener('keydown', (e) => this.onKeyPress(e));
   }

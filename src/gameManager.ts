@@ -46,7 +46,7 @@ export class GameManager {
     };
 
     this.startGame(Difficulty.EASY);
-    new SelectionManager(this.auxiliarLayers, scene, canvas);
+    new SelectionManager(this.auxiliarLayers, scene, canvas, this.rubiksCube);
   }
 
   private async startGame(difficulty: Difficulty): Promise<void> {
