@@ -17,6 +17,8 @@ export class SelectionManager {
 
   private baseCubieMaterial: Nullable<Material> = null;
 
+  private isSelecting = false;
+
   private readonly onPickMaterial = new StandardMaterial(
     'selected',
     this.scene
@@ -43,7 +45,11 @@ export class SelectionManager {
     return !!this.selectCubie;
   }
 
-  private onCanvasClick() {
+  private onCanvasClick(): void {
+    if (!this.isSelecting) {
+      return;
+    }
+
     if (this.selectedCubie) {
       this.unselectCubie(this.selectedCubie);
     }
@@ -134,7 +140,15 @@ export class SelectionManager {
 
   private setupSelection() {
     this.onPickMaterial.diffuseColor = new Color3(0.3, 0.3, 0.3);
-    this.canvas.addEventListener('click', () => this.onCanvasClick());
+    this.canvas.addEventListener(
+      'pointerdown',
+      () => (this.isSelecting = true)
+    );
+    this.canvas.addEventListener(
+      'pointermove',
+      () => (this.isSelecting = false)
+    );
+    this.canvas.addEventListener('pointerup', () => this.onCanvasClick());
     window.addEventListener('keydown', (e) => this.onKeyPress(e));
   }
 }
