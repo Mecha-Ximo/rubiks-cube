@@ -11,8 +11,11 @@ import { RubiksCube } from '../cube/rubiksCube';
 import { Axis } from '../types';
 import { AuxiliarLayers } from '../types/layer';
 import { CoordinateSystemHelper } from './coordinateSystemHelper';
+import { SelectionManagerUI } from './selectionManagerUI';
 
 export class SelectionManager {
+  private ui: SelectionManagerUI;
+
   private selectedCubie: Mesh | null = null;
 
   private baseCubieMaterial: Nullable<Material> = null;
@@ -39,6 +42,7 @@ export class SelectionManager {
     );
     this.coordinateSystemHelper.setVisible(false);
     this.setupSelection();
+    this.ui = new SelectionManagerUI();
   }
 
   public get isSelectionMode(): boolean {
@@ -79,12 +83,14 @@ export class SelectionManager {
     this.baseCubieMaterial = cubie.material;
     cubie.material = this.onPickMaterial;
     this.coordinateSystemHelper.setVisible(true);
+    this.ui.showSpinCubieDiv();
   }
 
   private unselectCubie(cubie: Mesh): void {
     cubie.material = this.baseCubieMaterial;
     this.selectedCubie = null;
     this.coordinateSystemHelper.setVisible(false);
+    this.ui.showSelectCubieDiv();
   }
 
   private async onKeyPress(e: KeyboardEvent) {
@@ -139,16 +145,20 @@ export class SelectionManager {
   }
 
   private setupSelection() {
-    this.onPickMaterial.diffuseColor = new Color3(0.3, 0.3, 0.3);
+    this.onPickMaterial.diffuseColor = new Color3(0.1, 0.1, 0.1);
+
     this.canvas.addEventListener(
       'pointerdown',
       () => (this.isSelecting = true)
     );
+
     this.canvas.addEventListener(
       'pointermove',
       () => (this.isSelecting = false)
     );
+
     this.canvas.addEventListener('pointerup', () => this.onCanvasClick());
+
     window.addEventListener('keydown', (e) => this.onKeyPress(e));
   }
 }
