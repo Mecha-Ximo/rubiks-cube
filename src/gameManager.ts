@@ -45,11 +45,15 @@ export class GameManager {
       }),
     };
 
-    this.startGame(Difficulty.EASY);
-    new SelectionManager(this.auxiliarLayers, scene, canvas, this.rubiksCube);
+    this.startGame(Difficulty.EASY, () => {
+      new SelectionManager(this.auxiliarLayers, scene, canvas, this.rubiksCube);
+    });
   }
 
-  private async startGame(difficulty: Difficulty): Promise<void> {
+  private async startGame(
+    difficulty: Difficulty,
+    onComplete: () => void
+  ): Promise<void> {
     const speed = 2.5;
 
     const moves =
@@ -78,5 +82,7 @@ export class GameManager {
         speed
       );
     }
+
+    onComplete();
   }
 }

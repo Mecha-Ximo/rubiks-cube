@@ -33,7 +33,7 @@ export class SelectionManager {
     this.coordinateSystemHelper = new CoordinateSystemHelper(
       rubiksCube,
       scene,
-      3
+      1.5
     );
     this.coordinateSystemHelper.setVisible(false);
     this.setupSelection();
