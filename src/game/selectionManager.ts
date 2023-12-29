@@ -128,12 +128,12 @@ export class SelectionManager {
         break;
       }
       case 'KeyQ': {
-        rotation = BASE_ROTATION;
+        rotation = -BASE_ROTATION;
         axis = 'z';
         break;
       }
       case 'KeyW': {
-        rotation = -BASE_ROTATION;
+        rotation = BASE_ROTATION;
         axis = 'z';
         break;
       }
