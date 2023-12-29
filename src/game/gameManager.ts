@@ -1,15 +1,22 @@
 import { Scene, ShadowGenerator, Vector3 } from '@babylonjs/core';
-import { BASE_ROTATION } from './constants';
-import { AuxiliarLayer } from './cube/auxiliarLayer';
-import { RubiksCube } from './cube/rubiksCube';
-import { SelectionManager } from './game/selectionManager';
-import { Axis, Difficulty } from './types';
-import { AuxiliarLayers } from './types/layer';
+import { BASE_ROTATION } from '../constants';
+import { AuxiliarLayer } from '../cube/auxiliarLayer';
+import { RubiksCube } from '../cube/rubiksCube';
+import { Axis, Difficulty, GameState } from '../types';
+import { AuxiliarLayers } from '../types/layer';
+import { GameManagerUI } from './gameManagerUI';
+import { SelectionManager } from './selectionManager';
 
 export class GameManager {
   private readonly rubiksCube: RubiksCube;
 
   private readonly auxiliarLayers: AuxiliarLayers;
+
+  private readonly ui: GameManagerUI;
+
+  private spins = 0;
+
+  private seconds = 0;
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -45,8 +52,39 @@ export class GameManager {
       }),
     };
 
+    this.ui = new GameManagerUI();
+
     this.startGame(Difficulty.EASY, () => {
-      new SelectionManager(this.auxiliarLayers, scene, canvas, this.rubiksCube);
+      new SelectionManager(
+        this.auxiliarLayers,
+        scene,
+        canvas,
+        this.rubiksCube,
+        () => {
+          this.spins++;
+          this.ui.updateGameStateDIV({
+            state: GameState.PLAYING,
+            spins: this.spins,
+            seconds: this.seconds,
+          });
+        }
+      );
+
+      this.ui.updateGameStateDIV({
+        state: GameState.PLAYING,
+        spins: this.spins,
+        seconds: this.seconds,
+      });
+
+      setInterval(() => {
+        this.seconds++;
+
+        this.ui.updateGameStateDIV({
+          state: GameState.PLAYING,
+          spins: this.spins,
+          seconds: this.seconds,
+        });
+      }, 1000);
     });
   }
 
@@ -72,6 +110,11 @@ export class GameManager {
     ];
 
     for (let i = 0; i < moves; i++) {
+      this.ui.updateGameStateDIV({
+        state: GameState.STARTING,
+        spinsLeft: moves - 1 - i,
+      });
+
       const cubieIndex = Math.floor(Math.random() * cubies.length);
       const axisIndex = Math.floor(Math.random() * axes.length);
       const rotationIndex = Math.floor(Math.random() * rotations.length);

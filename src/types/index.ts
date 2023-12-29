@@ -11,3 +11,9 @@ export enum Difficulty {
   MEDIUM = 'medium',
   HARD = 'hard',
 }
+
+export enum GameState {
+  STARTING = 'starting',
+  PLAYING = 'playing',
+  END = 'end',
+}

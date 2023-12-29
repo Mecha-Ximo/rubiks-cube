@@ -29,11 +29,14 @@ export class SelectionManager {
 
   private readonly coordinateSystemHelper: CoordinateSystemHelper;
 
+  private readonly onSpin: null | (() => void);
+
   constructor(
     private readonly auxiliarLayers: AuxiliarLayers,
     private readonly scene: Scene,
     private readonly canvas: HTMLCanvasElement,
-    rubiksCube: RubiksCube
+    rubiksCube: RubiksCube,
+    onSpin?: () => void
   ) {
     this.coordinateSystemHelper = new CoordinateSystemHelper(
       rubiksCube,
@@ -43,6 +46,7 @@ export class SelectionManager {
     this.coordinateSystemHelper.setVisible(false);
     this.setupSelection();
     this.ui = new SelectionManagerUI();
+    this.onSpin = onSpin ?? null;
   }
 
   public get isSelectionMode(): boolean {
@@ -98,7 +102,7 @@ export class SelectionManager {
       return;
     }
 
-    const speed = 5;
+    const speed = 4;
     let rotation = 0;
     let axis: Axis = 'x';
 
@@ -134,6 +138,8 @@ export class SelectionManager {
         break;
       }
     }
+
+    this.onSpin?.();
 
     await this.auxiliarLayers[axis].spinCube(
       this.selectedCubie,

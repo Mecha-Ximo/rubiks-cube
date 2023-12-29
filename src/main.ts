@@ -1,4 +1,4 @@
-import { GameManager } from './gameManager';
+import { GameManager } from './game/gameManager';
 import './index.css';
 import { createScene } from './scene';
 

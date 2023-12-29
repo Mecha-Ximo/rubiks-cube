@@ -31,3 +31,7 @@ export function getMeshesCenter(meshes: Mesh[]): Vector3 {
 
   return center;
 }
+
+export function pad(value: number): string | number {
+  return value < 10 ? '0' + value : value;
+}
