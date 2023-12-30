@@ -11,6 +11,7 @@ import {
   StandardMaterial,
   Vector3,
 } from '@babylonjs/core';
+import { Inspector } from '@babylonjs/inspector';
 
 export const createScene = (
   canvas: HTMLCanvasElement
@@ -47,6 +48,9 @@ export const createScene = (
   const groundMaterial = new StandardMaterial('ground-material', scene);
   groundMaterial.diffuseColor = new Color3(0.9, 0.9, 0.9);
   ground.material = groundMaterial;
+
+  Inspector.Show(scene, {});
+  scene.debugLayer.show();
 
   return {
     scene,
