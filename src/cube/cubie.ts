@@ -10,10 +10,7 @@ import {
 import { Position } from '../types';
 
 export class Cubie {
-  // TODO make private
-  public mesh: Mesh;
-
-  private readonly scene: Scene;
+  public readonly mesh: Mesh;
 
   constructor(
     name: string,
@@ -22,8 +19,6 @@ export class Cubie {
     position: Position,
     cubieFacesMaterial: MultiMaterial
   ) {
-    this.scene = scene;
-
     const box = MeshBuilder.CreateBox(name, { size: 0.9 }, scene);
     box.subMeshes = [];
     const verticesCount = box.getTotalVertices();

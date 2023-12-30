@@ -31,6 +31,8 @@ export class SelectionManager {
 
   private readonly onSpin: null | (() => void);
 
+  public canSelect = false;
+
   constructor(
     private readonly auxiliarLayers: AuxiliarLayers,
     private readonly scene: Scene,
@@ -54,6 +56,10 @@ export class SelectionManager {
   }
 
   private onCanvasClick(): void {
+    if (!this.canSelect) {
+      return;
+    }
+
     if (!this.isSelecting) {
       return;
     }

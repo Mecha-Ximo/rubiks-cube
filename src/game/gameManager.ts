@@ -10,6 +10,8 @@ import { SelectionManager } from './selectionManager';
 export class GameManager {
   private readonly rubiksCube: RubiksCube;
 
+  private readonly selectionManger: SelectionManager;
+
   private readonly auxiliarLayers: AuxiliarLayers;
 
   private readonly ui: GameManagerUI;
@@ -56,23 +58,30 @@ export class GameManager {
       }),
     };
 
+    this.selectionManger = new SelectionManager(
+      this.auxiliarLayers,
+      scene,
+      canvas,
+      this.rubiksCube,
+      () => this.onSpin()
+    );
+
     this.ui = new GameManagerUI();
 
-    this.startGame(this.difficulty, () => {
-      new SelectionManager(
-        this.auxiliarLayers,
-        scene,
-        canvas,
-        this.rubiksCube,
-        () => {
-          this.spins++;
-          this.ui.updateGameStateDIV({
-            state: GameState.PLAYING,
-            spins: this.spins,
-            seconds: this.seconds,
-          });
-        }
-      );
+    this.onGameStateChange(GameState.STARTING);
+  }
+
+  private onGameStateChange(newState: GameState): void {
+    if (newState === GameState.STARTING) {
+      this.selectionManger.canSelect = false;
+
+      this.startGame(this.difficulty, () => {
+        this.onGameStateChange(GameState.PLAYING);
+      });
+    }
+
+    if (newState === GameState.PLAYING) {
+      this.selectionManger.canSelect = true;
 
       this.ui.updateGameStateDIV({
         state: GameState.PLAYING,
@@ -81,14 +90,28 @@ export class GameManager {
       });
 
       setInterval(() => {
-        this.seconds++;
-
-        this.ui.updateGameStateDIV({
-          state: GameState.PLAYING,
-          spins: this.spins,
-          seconds: this.seconds,
-        });
+        this.onSecond();
       }, 1000);
+    }
+  }
+
+  private onSpin(): void {
+    this.spins++;
+
+    this.ui.updateGameStateDIV({
+      state: GameState.PLAYING,
+      spins: this.spins,
+      seconds: this.seconds,
+    });
+  }
+
+  private onSecond(): void {
+    this.seconds++;
+
+    this.ui.updateGameStateDIV({
+      state: GameState.PLAYING,
+      spins: this.spins,
+      seconds: this.seconds,
     });
   }
 
