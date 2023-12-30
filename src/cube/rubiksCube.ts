@@ -1,7 +1,10 @@
 import {
+  Color3,
   Mesh,
+  MultiMaterial,
   Scene,
   ShadowGenerator,
+  StandardMaterial,
   TransformNode,
   Vector3,
 } from '@babylonjs/core';
@@ -19,9 +22,12 @@ type RubiksCubeProps = {
 export class RubiksCube extends TransformNode {
   private cubeCenter: Vector3;
 
+  private readonly cubieMaterial: MultiMaterial;
+
   constructor(props: RubiksCubeProps) {
     super(props.name, props.scene);
 
+    this.cubieMaterial = this.createMultiMaterial(props.scene);
     this.position = props.position;
 
     const cubiesMeshes = this.createCubies(
@@ -41,6 +47,8 @@ export class RubiksCube extends TransformNode {
     return this.getChildMeshes();
   }
 
+  public rebuild(): void {}
+
   private createCubies(
     size: number,
     scene: Scene,
@@ -59,7 +67,8 @@ export class RubiksCube extends TransformNode {
               x: i,
               y: j,
               z: k,
-            }
+            },
+            this.cubieMaterial
           );
 
           meshes.push(cube.mesh);
@@ -69,5 +78,28 @@ export class RubiksCube extends TransformNode {
     }
 
     return meshes;
+  }
+
+  private createMultiMaterial(scene: Scene): MultiMaterial {
+    const colors = [
+      new Color3(0.8, 0.1, 0.1), // Red
+      new Color3(0, 1, 0), // Green
+      new Color3(0, 0, 1), // Blue
+      new Color3(1, 1, 0), // Yellow
+      new Color3(1, 0, 1), // Purple
+      new Color3(0, 1, 1), // Cyan
+    ];
+
+    const materials: StandardMaterial[] = [];
+    for (const [index, color] of colors.entries()) {
+      const material = new StandardMaterial(`face-${index}`, scene);
+      material.diffuseColor = color;
+      materials.push(material);
+    }
+
+    const multiMaterial = new MultiMaterial('multi-material', scene);
+    multiMaterial.subMaterials = materials;
+
+    return multiMaterial;
   }
 }

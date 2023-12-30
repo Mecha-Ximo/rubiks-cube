@@ -14,6 +14,10 @@ export class GameManager {
 
   private readonly ui: GameManagerUI;
 
+  private difficulty = Difficulty.EASY;
+
+  private size = 4;
+
   private spins = 0;
 
   private seconds = 0;
@@ -28,7 +32,7 @@ export class GameManager {
       position: new Vector3(-1, 2, 0),
       scene,
       shadowGenerator,
-      size: 4,
+      size: this.size,
     });
 
     this.auxiliarLayers = {
@@ -54,7 +58,7 @@ export class GameManager {
 
     this.ui = new GameManagerUI();
 
-    this.startGame(Difficulty.EASY, () => {
+    this.startGame(this.difficulty, () => {
       new SelectionManager(
         this.auxiliarLayers,
         scene,
