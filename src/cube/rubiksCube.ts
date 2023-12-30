@@ -24,11 +24,17 @@ export class RubiksCube extends TransformNode {
 
   private readonly cubieMaterial: MultiMaterial;
 
+  private readonly scene: Scene;
+
+  private readonly shadowGenerator: ShadowGenerator;
+
   constructor(props: RubiksCubeProps) {
     super(props.name, props.scene);
 
     this.cubieMaterial = this.createMultiMaterial(props.scene);
     this.position = props.position;
+    this.scene = props.scene;
+    this.shadowGenerator = props.shadowGenerator;
 
     const cubiesMeshes = this.createCubies(
       props.size,
@@ -47,7 +53,13 @@ export class RubiksCube extends TransformNode {
     return this.getChildMeshes();
   }
 
-  public rebuild(): void {}
+  public rebuild(size: number): void {
+    for (const cubie of this.cubies) {
+      cubie.dispose();
+    }
+
+    this.createCubies(size, this.scene, this.shadowGenerator);
+  }
 
   private createCubies(
     size: number,
