@@ -50,7 +50,7 @@ export class RubiksCube extends TransformNode {
   }
 
   public get cubies(): Mesh[] {
-    return this.getChildMeshes();
+    return this.getChildMeshes<Mesh>().filter(({ id }) => id.startsWith('box'));
   }
 
   public rebuild(size: number): void {
