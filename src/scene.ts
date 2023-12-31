@@ -4,6 +4,7 @@ import {
   Color4,
   DirectionalLight,
   Engine,
+  GroundMesh,
   HemisphericLight,
   MeshBuilder,
   Scene,
@@ -14,7 +15,12 @@ import {
 
 export const createScene = (
   canvas: HTMLCanvasElement
-): { scene: Scene; shadowGenerator: ShadowGenerator; engine: Engine } => {
+): {
+  scene: Scene;
+  shadowGenerator: ShadowGenerator;
+  engine: Engine;
+  ground: GroundMesh;
+} => {
   const engine = new Engine(canvas, true);
   const scene = new Scene(engine);
   scene.clearColor = new Color4(0.2, 0.2, 0.2, 0.5);
@@ -55,5 +61,6 @@ export const createScene = (
     scene,
     shadowGenerator,
     engine,
+    ground,
   };
 };

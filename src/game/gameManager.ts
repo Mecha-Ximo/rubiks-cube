@@ -1,10 +1,11 @@
-import { Scene, ShadowGenerator, Vector3 } from '@babylonjs/core';
+import { GroundMesh, Scene, ShadowGenerator, Vector3 } from '@babylonjs/core';
 import { BASE_ROTATION } from '../constants';
 import { AuxiliarLayer } from '../cube/auxiliarLayer';
 import { RubiksCube } from '../cube/rubiksCube';
 import { Axis, Difficulty, GameState } from '../types';
 import { AuxiliarLayers } from '../types/layer';
 import { GameManagerUI } from './gameManagerUI';
+import { PhysicsEngine } from './physicsEngine';
 import { SelectionManager } from './selectionManager';
 
 export class GameManager {
@@ -15,6 +16,12 @@ export class GameManager {
   private readonly auxiliarLayers: AuxiliarLayers;
 
   private readonly ui: GameManagerUI;
+
+  private readonly physicsEngine: PhysicsEngine;
+
+  private readonly ground: GroundMesh;
+
+  private intervalId: number | null = null;
 
   private difficulty = Difficulty.EASY;
 
@@ -27,11 +34,16 @@ export class GameManager {
   constructor(
     canvas: HTMLCanvasElement,
     scene: Scene,
-    shadowGenerator: ShadowGenerator
+    shadowGenerator: ShadowGenerator,
+    physicsEngine: PhysicsEngine,
+    ground: GroundMesh
   ) {
+    this.physicsEngine = physicsEngine;
+    this.ground = ground;
+
     this.rubiksCube = new RubiksCube({
       name: 'rubiks-cube',
-      position: new Vector3(-1, 2, 0),
+      position: new Vector3(0, 3, 0),
       scene,
       shadowGenerator,
       size: this.size,
@@ -66,13 +78,18 @@ export class GameManager {
       () => this.onSpin()
     );
 
-    this.ui = new GameManagerUI();
+    this.ui = new GameManagerUI(
+      () => this.surrender(),
+      () => this.restart()
+    );
 
     this.onGameStateChange(GameState.STARTING);
   }
 
   private onGameStateChange(newState: GameState): void {
     if (newState === GameState.STARTING) {
+      this.cleanInterval();
+      this.spins = 0;
       this.selectionManger.canSelect = false;
 
       this.startGame(this.difficulty, () => {
@@ -89,9 +106,29 @@ export class GameManager {
         seconds: this.seconds,
       });
 
-      setInterval(() => {
+      this.intervalId = setInterval(() => {
         this.onSecond();
       }, 1000);
+    }
+  }
+
+  private surrender(): void {
+    this.cleanInterval();
+
+    this.physicsEngine.enable(this.ground, this.rubiksCube.getChildMeshes());
+  }
+
+  private restart(): void {
+    this.physicsEngine.disable();
+    this.rubiksCube.rebuild(this.size);
+
+    this.onGameStateChange(GameState.STARTING);
+  }
+
+  private cleanInterval(): void {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
     }
   }
 
