@@ -31,7 +31,7 @@ export class SelectionManager {
 
   private readonly onSpin: null | (() => void);
 
-  public canSelect = false;
+  private _canSelect = false;
 
   constructor(
     private readonly auxiliarLayers: AuxiliarLayers,
@@ -55,8 +55,15 @@ export class SelectionManager {
     return !!this.selectCubie;
   }
 
+  public set canSelect(select: boolean) {
+    if (!select && this.selectedCubie) {
+      this.unselectCubie(this.selectedCubie);
+    }
+    this._canSelect = select;
+  }
+
   private onCanvasClick(): void {
-    if (!this.canSelect) {
+    if (!this._canSelect) {
       return;
     }
 

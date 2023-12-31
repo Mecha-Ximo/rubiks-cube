@@ -114,8 +114,9 @@ export class GameManager {
 
   private surrender(): void {
     this.cleanInterval();
+    this.selectionManger.canSelect = false;
 
-    this.physicsEngine.enable(this.ground, this.rubiksCube.getChildMeshes());
+    this.physicsEngine.enable(this.ground, this.rubiksCube.cubies);
   }
 
   private restart(): void {
@@ -173,7 +174,7 @@ export class GameManager {
       BASE_ROTATION * 3,
     ];
 
-    for (let i = 0; i < moves; i++) {
+    for (let i = 0; i < 5; i++) {
       this.ui.updateGameStateDIV({
         state: GameState.STARTING,
         spinsLeft: moves - 1 - i,

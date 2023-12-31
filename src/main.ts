@@ -10,7 +10,7 @@ if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
 
 const { scene, shadowGenerator, engine, ground } = await createScene(canvas);
 
-const physicsEngine = await PhysicsEngine.createEngine(scene);
+const physicsEngine = new PhysicsEngine(scene);
 new GameManager(canvas, scene, shadowGenerator, physicsEngine, ground);
 
 engine.runRenderLoop(() => {

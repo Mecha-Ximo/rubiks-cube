@@ -35,6 +35,7 @@ export class GameManagerUI {
     const button = document.createElement('button');
     button.textContent = text;
     button.style.display = 'block';
+    button.classList.add('border', 'p-2', 'm-2', 'border-black');
     button.onclick = onClick;
 
     return button;

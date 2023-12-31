@@ -14,20 +14,11 @@ import HavokPhysics from 'https://cdn.babylonjs.com/havok/HavokPhysics_es.js';
 export class PhysicsEngine {
   private readonly aggregates: PhysicsAggregate[] = [];
 
-  private constructor(
-    private readonly scene: Scene,
-    private readonly plugin: HavokPlugin
-  ) {}
+  constructor(private readonly scene: Scene) {}
 
-  public static async createEngine(scene: Scene): Promise<PhysicsEngine> {
-    const hk = await HavokPhysics();
-    const plugin = new HavokPlugin(true, hk);
-
-    return new PhysicsEngine(scene, plugin);
-  }
-
-  public enable(ground: GroundMesh, cubies: Mesh[]): void {
-    this.scene.enablePhysics(new Vector3(0, -9.8, 0), this.plugin);
+  public async enable(ground: GroundMesh, cubies: Mesh[]): Promise<void> {
+    const plugin = await this.createEngine();
+    this.scene.enablePhysics(new Vector3(0, -9.8, 0), plugin);
 
     const physicGround = new PhysicsAggregate(
       ground,
@@ -54,5 +45,12 @@ export class PhysicsEngine {
       aggregate.dispose();
     }
     this.scene.disablePhysicsEngine();
+  }
+
+  private async createEngine(): Promise<HavokPlugin> {
+    const hk = await HavokPhysics();
+    const plugin = new HavokPlugin(true, hk);
+
+    return plugin;
   }
 }
