@@ -79,6 +79,7 @@ export class GameManager {
     );
 
     this.ui = new GameManagerUI(
+      this.size,
       () => this.surrender(),
       () => this.restart()
     );
@@ -121,6 +122,8 @@ export class GameManager {
 
   private restart(): void {
     this.physicsEngine.disable();
+
+    this.size = this.ui.uiState.size;
     this.rubiksCube.rebuild(this.size);
 
     this.onGameStateChange(GameState.STARTING);
@@ -174,7 +177,7 @@ export class GameManager {
       BASE_ROTATION * 3,
     ];
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < moves; i++) {
       this.ui.updateGameStateDIV({
         state: GameState.STARTING,
         spinsLeft: moves - 1 - i,

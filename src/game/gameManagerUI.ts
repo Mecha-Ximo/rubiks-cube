@@ -19,16 +19,45 @@ export class GameManagerUI {
 
   private readonly surrenderButton: HTMLButtonElement;
 
-  private readonly restartButton: HTMLButtonElement;
+  private readonly restartSection: HTMLDivElement;
 
   private classes = ['absolute', 'top-0', 'right-0', 'p-4', 'font-bold'];
 
-  constructor(onSurrender: () => void, onNewGame: () => void) {
+  public uiState: { size: number };
+
+  constructor(size: number, onSurrender: () => void, onNewGame: () => void) {
+    this.uiState = {
+      size,
+    };
     this.gameStateDIV = this.createGameStateDIV();
     this.surrenderButton = this.createButton('Surrender', onSurrender);
-    this.restartButton = this.createButton('Restart', onNewGame);
+    this.restartSection = this.createRestartSection(onNewGame);
 
     document.body.append(this.gameStateDIV);
+  }
+
+  private createRestartSection(onNewGame: () => void): HTMLDivElement {
+    const div = document.createElement('div');
+
+    const h4 = document.createElement('h4');
+    h4.textContent = 'New game';
+
+    const label = document.createElement('label');
+    label.textContent = 'Size';
+    label.style.display = 'block';
+
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.value = this.uiState.size.toString();
+    input.addEventListener('input', (e) => {
+      this.uiState.size = +(e.target as HTMLInputElement).value;
+    });
+
+    const restartButton = this.createButton('Restart', onNewGame);
+
+    div.append(h4, label, input, restartButton);
+
+    return div;
   }
 
   private createButton(text: string, onClick: () => void): HTMLButtonElement {
@@ -52,7 +81,7 @@ export class GameManagerUI {
             <p>Timer: ${this.updateTimer(props.seconds)}</p>
         `;
       this.gameStateDIV.append(this.surrenderButton);
-      this.gameStateDIV.append(this.restartButton);
+      this.gameStateDIV.append(this.restartSection);
     }
   }
 
