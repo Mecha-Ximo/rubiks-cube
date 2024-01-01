@@ -80,6 +80,7 @@ export class GameManager {
 
     this.ui = new GameManagerUI(
       this.size,
+      this.difficulty,
       () => this.surrender(),
       () => this.restart()
     );
@@ -123,7 +124,9 @@ export class GameManager {
   private restart(): void {
     this.physicsEngine.disable();
 
-    this.size = this.ui.uiState.size;
+    this.size = this.ui.state.size;
+    this.difficulty = this.ui.state.difficulty;
+
     this.rubiksCube.rebuild(this.size);
 
     this.onGameStateChange(GameState.STARTING);

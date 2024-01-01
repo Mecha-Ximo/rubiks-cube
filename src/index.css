@@ -15,12 +15,20 @@
     @apply bg-black border-2 text-white rounded-md border-white hover:bg-white hover:text-black hover:border-black;
   }
 
-  input {
+  input[type='number'] {
     @apply rounded-md w-16 p-1 pl-3 border-2 border-black;
   }
 
+  input[type='radio'] {
+    @apply ml-2;
+  }
+
   h4 {
-    @apply my-1 mt-4 underline;
+    @apply mt-1 uppercase pt-2 py-1;
+  }
+
+  h3 {
+    @apply uppercase underline mt-4;
   }
 }
 

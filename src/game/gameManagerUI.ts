@@ -1,4 +1,4 @@
-import { GameState } from '../types';
+import { Difficulty, GameState } from '../types';
 import { pad } from '../utils';
 
 type StartingStateInfo = {
@@ -23,11 +23,17 @@ export class GameManagerUI {
 
   private classes = ['absolute', 'top-0', 'right-0', 'p-4', 'font-bold'];
 
-  public uiState: { size: number };
+  public state: { size: number; difficulty: Difficulty };
 
-  constructor(size: number, onSurrender: () => void, onNewGame: () => void) {
-    this.uiState = {
+  constructor(
+    size: number,
+    difficulty: Difficulty,
+    onSurrender: () => void,
+    onNewGame: () => void
+  ) {
+    this.state = {
       size,
+      difficulty,
     };
     this.gameStateDIV = this.createGameStateDIV();
     this.surrenderButton = this.createButton('Surrender', onSurrender);
@@ -39,23 +45,40 @@ export class GameManagerUI {
   private createRestartSection(onNewGame: () => void): HTMLDivElement {
     const div = document.createElement('div');
 
-    const h4 = document.createElement('h4');
-    h4.textContent = 'New game';
+    const newGameH = document.createElement('h3');
+    newGameH.textContent = 'New game';
 
-    const label = document.createElement('label');
-    label.textContent = 'Size';
-    label.style.display = 'block';
+    const h4Size = document.createElement('h4');
+    h4Size.textContent = 'Size';
 
     const input = document.createElement('input');
     input.type = 'number';
-    input.value = this.uiState.size.toString();
+    input.value = this.state.size.toString();
     input.addEventListener('input', (e) => {
-      this.uiState.size = +(e.target as HTMLInputElement).value;
+      this.state.size = +(e.target as HTMLInputElement).value;
     });
+
+    const h4Difficulty = document.createElement('h4');
+    h4Difficulty.textContent = 'Difficulty';
+    const easyInput = this.createDifficultyRadioButton('Easy', Difficulty.EASY);
+    const mediumInput = this.createDifficultyRadioButton(
+      'Medium',
+      Difficulty.MEDIUM
+    );
+    const hardInput = this.createDifficultyRadioButton('Hard', Difficulty.HARD);
 
     const restartButton = this.createButton('Restart', onNewGame);
 
-    div.append(h4, label, input, restartButton);
+    div.append(
+      newGameH,
+      h4Size,
+      input,
+      h4Difficulty,
+      easyInput,
+      mediumInput,
+      hardInput,
+      restartButton
+    );
 
     return div;
   }
@@ -100,5 +123,42 @@ export class GameManagerUI {
     const secs = seconds % 60;
 
     return `${pad(hours)}:${pad(minutes)}:${pad(secs)}`;
+  }
+
+  private createDifficultyRadioButton(label: string, value: Difficulty) {
+    const labelEl = document.createElement('label');
+    labelEl.htmlFor = label.toLowerCase();
+    labelEl.textContent = label;
+
+    const radioEl = document.createElement('input');
+    radioEl.type = 'radio';
+    radioEl.id = label.toLowerCase();
+    radioEl.value = value;
+    radioEl.name = 'difficulty';
+
+    radioEl.addEventListener('change', (e) => {
+      const update = (e.target as HTMLInputElement).value;
+      if (!this.isValidDifficultyUpdate(update)) {
+        return;
+      }
+      this.state.difficulty = update;
+    });
+
+    if (value === this.state.difficulty) {
+      radioEl.checked = true;
+    }
+
+    const div = document.createElement('div');
+    div.append(labelEl, radioEl);
+
+    return div;
+  }
+
+  private isValidDifficultyUpdate(update: string): update is Difficulty {
+    return (
+      update === Difficulty.EASY ||
+      update === Difficulty.MEDIUM ||
+      update === Difficulty.HARD
+    );
   }
 }
