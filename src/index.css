@@ -26,6 +26,6 @@
 
 @layer utilities {
   .game-state {
-    @apply w-[155px];
+    @apply w-[150px];
   }
 }

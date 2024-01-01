@@ -134,6 +134,7 @@ export class GameManager {
       clearInterval(this.intervalId);
       this.intervalId = null;
     }
+    this.seconds = 0;
   }
 
   private onSpin(): void {
