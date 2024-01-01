@@ -64,7 +64,7 @@ export class GameManagerUI {
     const button = document.createElement('button');
     button.textContent = text;
     button.style.display = 'block';
-    button.classList.add('border', 'p-2', 'm-2', 'border-black');
+    button.classList.add('p-2', 'my-2');
     button.onclick = onClick;
 
     return button;
@@ -77,8 +77,10 @@ export class GameManagerUI {
 
     if (props.state === GameState.PLAYING) {
       this.gameStateDIV.innerHTML = `
+          <div>
             <p>Spins done: ${props.spins}</p>
             <p>Timer: ${this.updateTimer(props.seconds)}</p>
+          </div>
         `;
       this.gameStateDIV.append(this.surrenderButton);
       this.gameStateDIV.append(this.restartSection);
@@ -87,7 +89,7 @@ export class GameManagerUI {
 
   private createGameStateDIV(): HTMLDivElement {
     const div = document.createElement('div');
-    div.classList.add(...this.classes);
+    div.classList.add(...this.classes, 'game-state');
 
     return div;
   }

@@ -6,4 +6,26 @@
   li {
     list-style: disc;
   }
+
+  p {
+    @apply overflow-hidden;
+  }
+
+  button {
+    @apply bg-black border-2 text-white rounded-md border-white hover:bg-white hover:text-black hover:border-black;
+  }
+
+  input {
+    @apply rounded-md w-16 p-1 pl-3 border-2 border-black;
+  }
+
+  h4 {
+    @apply my-1 mt-4 underline;
+  }
+}
+
+@layer utilities {
+  .game-state {
+    @apply w-[155px];
+  }
 }

@@ -25,7 +25,7 @@ export class SelectionManagerUI {
 
   private createSelectCubieDIV(): HTMLDivElement {
     const div = document.createElement('div');
-    div.textContent = 'Select a cubie by touching / clicking it';
+    div.textContent = 'Select a cubie by clicking on it';
     div.classList.add(...this.classes);
 
     return div;
